@@ -4,7 +4,7 @@
   "description": "CivicGenie Frontend",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm install && vite build",
     "preview": "vite preview",
     "vercel-build": "npm install && vite build"
   },
