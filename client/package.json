@@ -4,9 +4,8 @@
   "description": "CivicGenie Frontend",
   "scripts": {
     "dev": "vite",
-    "build": "npm install && vite build",
-    "preview": "vite preview",
-    "vercel-build": "npm install && vite build"
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
     "chart.js": "^4.5.0",
