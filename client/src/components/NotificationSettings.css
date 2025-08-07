@@ -1,0 +1,302 @@
+.notification-settings {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.notification-header {
+  padding: 24px;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.permission-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.status-icon {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.notification-content {
+  padding: 24px;
+}
+
+.permission-request {
+  text-align: center;
+  padding: 32px 0;
+}
+
+.permission-request p {
+  margin: 0 0 20px 0;
+  color: #6b7280;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.permission-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.permission-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.permission-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.subscription-controls {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.subscribe-button,
+.unsubscribe-button {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.subscribe-button {
+  background: #059669;
+  color: white;
+}
+
+.subscribe-button:hover:not(:disabled) {
+  background: #047857;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.unsubscribe-button {
+  background: #dc2626;
+  color: white;
+}
+
+.unsubscribe-button:hover:not(:disabled) {
+  background: #b91c1c;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.subscribe-button:disabled,
+.unsubscribe-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.preferences-section h3 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.preferences-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.preference-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.preference-item:hover {
+  background: #f9fafb;
+}
+
+.preference-item input[type="checkbox"] {
+  margin: 0;
+  width: 18px;
+  height: 18px;
+  accent-color: #667eea;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.preference-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.preference-label strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.preference-description {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.permission-denied {
+  padding: 24px;
+  background: #fef2f2;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+}
+
+.permission-denied p {
+  margin: 0 0 16px 0;
+  color: #991b1b;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.permission-denied ol {
+  margin: 0;
+  padding-left: 20px;
+  color: #991b1b;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.permission-denied li {
+  margin-bottom: 8px;
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .notification-settings {
+    margin: 16px;
+    border-radius: 12px;
+  }
+
+  .notification-header {
+    padding: 20px;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .notification-header h2 {
+    font-size: 18px;
+  }
+
+  .notification-content {
+    padding: 20px;
+  }
+
+  .permission-request {
+    padding: 24px 0;
+  }
+
+  .permission-request p {
+    font-size: 15px;
+  }
+
+  .permission-button,
+  .subscribe-button,
+  .unsubscribe-button {
+    padding: 10px 20px;
+    font-size: 15px;
+  }
+
+  .preferences-section h3 {
+    font-size: 16px;
+  }
+
+  .preference-item {
+    padding: 10px;
+  }
+
+  .preference-label strong {
+    font-size: 13px;
+  }
+
+  .preference-description {
+    font-size: 12px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .notification-settings {
+    background: #1f2937;
+    border-color: #374151;
+  }
+
+  .notification-header {
+    border-bottom-color: #374151;
+  }
+
+  .notification-header h2 {
+    color: #f9fafb;
+  }
+
+  .preferences-section h3 {
+    color: #f9fafb;
+  }
+
+  .preference-item:hover {
+    background: #374151;
+  }
+
+  .preference-label strong {
+    color: #f9fafb;
+  }
+
+  .preference-description {
+    color: #d1d5db;
+  }
+
+  .permission-request p {
+    color: #d1d5db;
+  }
+
+  .permission-denied {
+    background: #450a0a;
+    border-color: #7f1d1d;
+  }
+
+  .permission-denied p,
+  .permission-denied ol {
+    color: #fca5a5;
+  }
+} 

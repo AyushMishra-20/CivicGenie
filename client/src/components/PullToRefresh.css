@@ -1,0 +1,138 @@
+.pull-to-refresh-container {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.pull-to-refresh-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.refresh-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.refresh-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+.pull-icon {
+  transition: transform 0.2s ease;
+}
+
+.refresh-text {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.refresh-progress {
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: white;
+  border-radius: 2px;
+  transition: width 0.1s ease;
+}
+
+.pull-to-refresh-content {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .pull-to-refresh-indicator {
+    padding: 15px;
+  }
+  
+  .refresh-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .refresh-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .refresh-text {
+    font-size: 13px;
+  }
+}
+
+/* Touch feedback */
+.pull-to-refresh-container:active {
+  cursor: grabbing;
+}
+
+/* Accessibility */
+.pull-to-refresh-indicator:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .pull-to-refresh-indicator {
+    background: #000;
+    border: 2px solid #fff;
+  }
+  
+  .progress-bar {
+    background: #fff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+  
+  .pull-icon {
+    transition: none;
+  }
+  
+  .progress-bar {
+    transition: none;
+  }
+}

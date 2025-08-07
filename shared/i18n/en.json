@@ -1,0 +1,12 @@
+{
+  "complaint": {
+    "title": "Report a Civic Issue",
+    "description": "Describe your problem",
+    "submit": "Submit Complaint",
+    "status": {
+      "open": "Open",
+      "in_progress": "In Progress",
+      "resolved": "Resolved"
+    }
+  }
+} 

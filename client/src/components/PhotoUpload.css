@@ -1,0 +1,245 @@
+/* Photo Upload Container */
+.photo-upload {
+  margin-bottom: 1.5rem;
+}
+
+.photo-header {
+  margin-bottom: 1rem;
+}
+
+.photo-header h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+}
+
+.photo-header p {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Photo Options */
+.photo-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.photo-btn {
+  padding: 0.875rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.photo-btn.primary {
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  color: white;
+}
+
+.photo-btn.primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(30, 64, 175, 0.3);
+}
+
+.photo-btn.secondary {
+  background: rgba(59, 130, 246, 0.1);
+  color: #1e40af;
+  border: 2px solid rgba(59, 130, 246, 0.2);
+}
+
+.photo-btn.secondary:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.photo-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Camera Container */
+.camera-container {
+  background: rgba(0, 0, 0, 0.05);
+  border: 2px solid rgba(59, 130, 246, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.camera-video {
+  width: 100%;
+  max-width: 400px;
+  height: 300px;
+  border-radius: 8px;
+  background: #000;
+  display: block;
+  margin: 0 auto 1rem;
+}
+
+.camera-controls {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.camera-controls .photo-btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+}
+
+/* Photo Gallery */
+.photo-gallery {
+  margin-top: 1.5rem;
+}
+
+.photo-gallery h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.photo-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.photo-item:hover {
+  transform: scale(1.05);
+}
+
+.photo-item img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+}
+
+.remove-photo {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.remove-photo:hover {
+  background: rgba(239, 68, 68, 1);
+  transform: scale(1.1);
+}
+
+/* Photo Limit */
+.photo-limit {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.photo-limit p {
+  color: #92400e;
+  font-size: 0.9rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Photo Error */
+.photo-error {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.error-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.photo-error p {
+  color: #92400e;
+  font-size: 0.9rem;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .camera-video {
+    height: 250px;
+  }
+  
+  .photo-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.75rem;
+  }
+  
+  .photo-item img {
+    height: 100px;
+  }
+  
+  .camera-controls {
+    flex-direction: column;
+  }
+  
+  .camera-controls .photo-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .photo-btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .camera-video {
+    height: 200px;
+  }
+  
+  .photo-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.5rem;
+  }
+  
+  .photo-item img {
+    height: 80px;
+  }
+} 
