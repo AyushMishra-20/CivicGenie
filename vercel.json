@@ -23,11 +23,6 @@
       "dest": "client/dist/$1"
     }
   ],
-  "functions": {
-    "server/src/app.ts": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "env": {
     "NODE_ENV": "production"
   }
