@@ -7,7 +7,7 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "vercel-build": "npx tsc && npx vite build"
+    "vercel-build": "npm run build --workspace=client"
 },
     "dependencies": {
         "react": "^18.2.0",
