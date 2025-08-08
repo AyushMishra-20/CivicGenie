@@ -23,7 +23,7 @@
       "dest": "client/dist/$1"
     }
   ],
-  "installCommand": "npm install",
+  "installCommand": "npm install --include=dev",
   "buildCommand": "npm run build --workspace=client",
   "env": {
     "NODE_ENV": "production"
