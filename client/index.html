@@ -36,19 +36,29 @@
     <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     
-    <!-- Service Worker Registration -->
+    <!-- Service Worker Registration (disabled on localhost/dev) -->
     <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          navigator.serviceWorker.register('/sw.js')
-            .then(function(registration) {
-              console.log('SW registered: ', registration);
-            })
-            .catch(function(registrationError) {
-              console.log('SW registration failed: ', registrationError);
-            });
-        });
-      }
+      (function() {
+        const isLocalhost = /localhost|127\.0\.0\.1|::1/.test(location.hostname);
+        if ('serviceWorker' in navigator && !isLocalhost) {
+          window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/sw.js')
+              .then(function(registration) {
+                console.log('SW registered: ', registration);
+              })
+              .catch(function(registrationError) {
+                console.log('SW registration failed: ', registrationError);
+              });
+          });
+        } else if ('serviceWorker' in navigator && isLocalhost) {
+          // Ensure no SW controls dev to avoid HMR/websocket issues
+          navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+          if (window.caches) {
+            caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+          }
+          console.log('SW disabled in development and any existing registrations cleared');
+        }
+      })();
     </script>
   </head>
   <body>

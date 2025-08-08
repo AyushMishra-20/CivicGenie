@@ -23,6 +23,9 @@ export interface OfflineComplaint {
   status: 'pending' | 'synced' | 'failed';
 }
 
+const isDev = typeof import.meta !== 'undefined' ? import.meta.env.DEV : false;
+const isLocalhost = typeof window !== 'undefined' && /localhost|127\.0\.0\.1|::1/.test(window.location.hostname);
+
 class PWAService {
   private swRegistration: ServiceWorkerRegistration | null = null;
   private installPrompt: PWAInstallPrompt | null = null;
@@ -51,16 +54,36 @@ class PWAService {
       this.dispatchEvent('installPromptAvailable');
     });
 
-    // Register service worker
-    await this.registerServiceWorker();
+    // Register or explicitly unregister service worker based on env
+    await this.setupServiceWorkerForEnvironment();
   }
 
-  private async registerServiceWorker(): Promise<void> {
+  private async setupServiceWorkerForEnvironment(): Promise<void> {
     if (!('serviceWorker' in navigator)) {
       console.warn('Service Worker not supported');
       return;
     }
 
+    if (isDev || isLocalhost) {
+      // Ensure no SW controls dev to avoid HMR/websocket issues
+      try {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+        if (window.caches) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map((k) => caches.delete(k)));
+        }
+        console.log('Service Worker disabled in development; registrations cleared');
+      } catch (error) {
+        console.warn('Failed to clear Service Worker in dev:', error);
+      }
+      return;
+    }
+
+    await this.registerServiceWorker();
+  }
+
+  private async registerServiceWorker(): Promise<void> {
     try {
       this.swRegistration = await navigator.serviceWorker.register('/sw.js');
       console.log('Service Worker registered:', this.swRegistration);
@@ -81,7 +104,6 @@ class PWAService {
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         this.dispatchEvent('swUpdated');
       });
-
     } catch (error) {
       console.error('Service Worker registration failed:', error);
     }
@@ -146,7 +168,7 @@ class PWAService {
     try {
       const subscription = await this.swRegistration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: this.urlBase64ToUint8Array(process.env.VITE_VAPID_PUBLIC_KEY || '')
+        applicationServerKey: this.urlBase64ToUint8Array(import.meta.env.VITE_VAPID_PUBLIC_KEY || '')
       });
 
       console.log('Push subscription created:', subscription);
