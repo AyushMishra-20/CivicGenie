@@ -3,11 +3,11 @@
     "version": "1.0.0",
     "description": "CivicGenie Frontend",
     "scripts": {
-        "dev": "vite",
-        "build": "tsc && vite build",
-        "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-        "preview": "vite preview",
-        "vercel-build": "vite build"
+      "dev": "vite",
+      "build": "tsc && vite build",
+      "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+      "preview": "vite preview",
+      "vercel-build": "tsc && vite build"
     },
     "dependencies": {
         "react": "^18.2.0",
