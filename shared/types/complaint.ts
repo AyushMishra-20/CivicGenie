@@ -1,35 +1,28 @@
 export interface Complaint {
   id: string;
-  user: string;
-  description: string;
-  language: 'en' | 'hi' | 'mr';
-  category: 'roads' | 'garbage' | 'water' | 'electricity' | 'sewage' | 'traffic' | 'streetlight' | 'other';
-  status: 'open' | 'in_progress' | 'resolved';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  department: string;
-  estimatedResolutionTime: string;
-  keywords: string[];
-  confidence: number;
-  suggestions: string[];
-  photos: string[];
+  text: string;
+  category: string;
+  priority: 'low' | 'medium' | 'high';
+  status: 'pending' | 'in-progress' | 'resolved' | 'closed';
   location: {
     latitude: number;
     longitude: number;
     address: string;
-    city: string;
-    state: string;
-    pincode: string;
   };
-  notificationPreferences: NotificationPreferencesData;
-  createdAt: string;
-  updatedAt: string;
+  photos?: string[];
+  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-export interface NotificationPreferencesData {
-  enabled: boolean;
-  email?: string;
-  phone?: string;
-  browserNotifications: boolean;
-  statusUpdates: boolean;
-  resolutionUpdates: boolean;
+export interface CreateComplaintRequest {
+  text: string;
+  category: string;
+  priority: 'low' | 'medium' | 'high';
+  location: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
+  photos?: string[];
 } 
