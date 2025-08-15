@@ -52,7 +52,7 @@ Access the application at:
 
 ## 🌐 Deployment
 
-### Option 1: Vercel + Railway (Recommended)
+### Netlify + Railway (Recommended)
 
 #### Deploy Backend to Railway
 1. Go to [Railway.app](https://railway.app)
@@ -66,28 +66,18 @@ Access the application at:
    MONGODB_URI=your-mongodb-atlas-uri
    ```
 
-#### Deploy Frontend to Vercel
-1. Go to [Vercel.com](https://vercel.com)
+#### Deploy Frontend to Netlify
+1. Go to [Netlify.com](https://netlify.com)
 2. Sign up with GitHub
 3. Import your repository
 4. Configure:
-   - Framework: Vite
-   - Root Directory: `client`
+   - Base Directory: `client`
    - Build Command: `npm run build`
-   - Output Directory: `dist`
+   - Publish Directory: `dist`
 5. Add environment variable:
    ```
-   VITE_API_URL=https://your-railway-app.railway.app/api/complaints
+   VITE_API_URL=https://your-railway-app.railway.app
    ```
-
-### Option 2: All-in-One Vercel Deployment
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel --prod
-```
 
 ## 🛠️ Technology Stack
 
@@ -105,7 +95,7 @@ vercel --prod
 - **bcrypt** for password hashing
 
 ### Deployment
-- **Vercel** for frontend hosting
+- **Netlify** for frontend hosting
 - **Railway** for backend hosting
 - **MongoDB Atlas** for database
 

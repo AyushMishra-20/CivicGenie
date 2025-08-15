@@ -11,7 +11,6 @@
     "build:server": "npm run build --workspace=server",
     "start": "npm run start --workspace=server",
     "deploy:prepare": "npm run build && echo 'Ready for deployment!'",
-    "deploy:vercel": "vercel --prod",
     "deploy:railway": "railway up"
   },
   "keywords": ["civic", "complaints", "management", "react", "nodejs"],
