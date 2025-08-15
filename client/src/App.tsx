@@ -2543,7 +2543,7 @@ const App = () => {
 
    // Show authentication forms
    if (authView === 'login') {
-     return (
+  return (
        <div className="auth-container">
          {/* Notifications for auth pages */}
          <div className="notifications-container">
