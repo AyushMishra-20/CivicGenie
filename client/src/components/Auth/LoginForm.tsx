@@ -1,55 +1,54 @@
 import React, { useState } from 'react';
-import './Auth.css';
+import { Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
 
 interface LoginFormProps {
-  onLoginSuccess: (token: string, user: any) => void;
-  onSwitchToRegister: () => void;
+  onLogin: (credentials: { email: string; password: string; role: string }) => void;
+  onSignup: () => void;
+  loading?: boolean;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onSwitchToRegister }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ onLogin, onSignup, loading = false }) => {
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
+    role: 'citizen'
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Email is invalid';
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    }
+
+
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-
-      // Store token and user data
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      
-      onLoginSuccess(data.token, data.user);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
-    } finally {
-      setLoading(false);
+    
+    if (validateForm()) {
+      onLogin(formData);
     }
   };
 
@@ -57,62 +56,84 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess, onSwitchToRegiste
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <h2>Welcome Back</h2>
-          <p>Sign in to your CiviGenie account</p>
+          <h2 className="auth-title">Welcome Back</h2>
+          <p className="auth-subtitle">Sign in to your CiviGenie account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
-          {error && (
-            <div className="error-message">
-              <p>{error}</p>
-            </div>
-          )}
-
+          {/* Email Field */}
           <div className="form-group">
-            <label htmlFor="email">Email Address</label>
+            <label className="form-label">
+              <Mail className="form-icon" />
+              Email Address
+            </label>
             <input
               type="email"
-              id="email"
               name="email"
               value={formData.email}
-              onChange={handleChange}
-              required
+              onChange={handleInputChange}
+              className={`form-input ${errors.email ? 'error' : ''}`}
               placeholder="Enter your email"
-              className="form-input"
             />
+            {errors.email && <span className="error-message">{errors.email}</span>}
           </div>
 
+          {/* Role Selection Field */}
           <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              placeholder="Enter your password"
+            <label className="form-label">
+              <User className="form-icon" />
+              Login As
+            </label>
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleInputChange}
               className="form-input"
-            />
+            >
+              <option value="citizen">Citizen</option>
+              <option value="administrator">Administrator</option>
+              <option value="department_staff">Department Staff</option>
+            </select>
           </div>
 
-          <button 
-            type="submit" 
-            className="auth-button"
-            disabled={loading}
-          >
+          {/* Password Field */}
+          <div className="form-group">
+            <label className="form-label">
+              <Lock className="form-icon" />
+              Password
+            </label>
+            <div className="password-input-container">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+                className={`form-input ${errors.password ? 'error' : ''}`}
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff /> : <Eye />}
+              </button>
+            </div>
+            {errors.password && <span className="error-message">{errors.password}</span>}
+          </div>
+
+          {/* Submit Button */}
+          <button type="submit" className="auth-button" disabled={loading}>
             {loading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
 
+        {/* Signup Link */}
         <div className="auth-footer">
-          <p>
+          <p className="auth-footer-text">
             Don't have an account?{' '}
-            <button 
-              onClick={onSwitchToRegister}
-              className="auth-link"
-            >
-              Sign up here
+            <button type="button" onClick={onSignup} className="auth-link">
+              Sign Up
             </button>
           </p>
         </div>

@@ -14,7 +14,7 @@ const inMemoryUsers: any[] = [];
 // Rate limiting for auth routes
 const authRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 requests per windowMs
+  max: 50, // limit each IP to 50 requests per windowMs (increased for testing)
   message: {
     error: 'Too many authentication attempts',
     message: 'Please try again in 15 minutes'
@@ -24,96 +24,83 @@ const authRateLimit = rateLimit({
 // Generate JWT token
 const generateToken = (user: any): string => {
   const payload: JWTPayload = {
-    userId: user._id.toString(),
+    userId: (user._id || user.id).toString(),
     email: user.email,
     role: user.role
   };
-  
-  return jwt.sign(payload, config.jwt.secret, { 
-    expiresIn: config.jwt.expiresIn as any
-  });
+  return jwt.sign(payload, config.jwt.secret, { expiresIn: '24h' });
 };
 
 // Register new user
 router.post('/register', authRateLimit, async (req, res) => {
   try {
-    const { email, password, name, phone, role = 'citizen', department } = req.body;
+    const { name, email, password, phone, role } = req.body;
 
     // Validate required fields
-    if (!email || !password || !name) {
+    if (!name || !email || !password || !phone || !role) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: 'Email, password, and name are required'
+        message: 'Name, email, password, phone, and role are required'
       });
     }
 
-    // Check if user already exists (try MongoDB first, then in-memory)
-    let existingUser = null;
+    // Check if user already exists
+    let existingUser;
     try {
       existingUser = await User.findOne({ email });
     } catch (error) {
-      // MongoDB not available, check in-memory
+      // If database is not available, check in-memory storage
       existingUser = inMemoryUsers.find(u => u.email === email);
     }
 
     if (existingUser) {
-      return res.status(409).json({
+      return res.status(400).json({
         error: 'User already exists',
-        message: 'An account with this email already exists'
+        message: 'A user with this email already exists'
       });
     }
 
-    // Create new user
-    let user;
+    // Hash password (reduced salt rounds for faster development)
+    const saltRounds = 4;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create user object
+    const userData = {
+      name,
+      email,
+      password: hashedPassword,
+      phone,
+      role,
+      isActive: true
+    };
+
+    // Try to save to database first
+    let newUser;
     try {
-      // Try MongoDB first
-      user = new User({
-        email,
-        password,
-        name,
-        phone,
-        role,
-        department
-      });
-      await user.save();
+      newUser = await User.create(userData);
     } catch (error) {
-      // MongoDB failed, use in-memory
-      const hashedPassword = await bcrypt.hash(password, 12);
-      user = {
-        _id: Date.now().toString(),
-        email,
-        password: hashedPassword,
-        name,
-        phone,
-        role,
-        department,
-        isActive: true,
-        createdAt: new Date(),
-        comparePassword: async function(candidatePassword: string) {
-          return bcrypt.compare(candidatePassword, this.password);
-        }
+      // If database fails, save to in-memory storage
+      newUser = {
+        id: Date.now().toString(),
+        ...userData,
+        _id: Date.now().toString()
       };
-      inMemoryUsers.push(user);
+      inMemoryUsers.push(newUser);
     }
 
     // Generate token
-    const token = generateToken(user);
-
-    // Return user data (without password) and token
-    const userResponse = {
-      _id: user._id,
-      email: user.email,
-      name: user.name,
-      phone: user.phone,
-      role: user.role,
-      department: user.department,
-      isActive: user.isActive,
-      createdAt: user.createdAt
-    };
+    const token = generateToken(newUser);
 
     res.status(201).json({
       message: 'User registered successfully',
-      user: userResponse,
+      user: {
+        id: newUser._id || newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        phone: newUser.phone,
+        role: newUser.role,
+        isActive: newUser.isActive
+      },
       token
     });
 
@@ -121,7 +108,7 @@ router.post('/register', authRateLimit, async (req, res) => {
     console.error('Registration error:', error);
     res.status(500).json({
       error: 'Registration failed',
-      message: 'Unable to create account. Please try again.'
+      message: 'Internal server error'
     });
   }
 });
@@ -129,23 +116,23 @@ router.post('/register', authRateLimit, async (req, res) => {
 // Login user
 router.post('/login', authRateLimit, async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
     // Validate required fields
-    if (!email || !password) {
+    if (!email || !password || !role) {
       return res.status(400).json({
-        error: 'Missing credentials',
-        message: 'Email and password are required'
+        error: 'Missing required fields',
+        message: 'Email, password, and role are required'
       });
     }
 
-    // Find user by email (try MongoDB first, then in-memory)
-    let user = null;
+    // Find user
+    let user;
     try {
-      user = await User.findOne({ email });
+      user = await User.findOne({ email, role });
     } catch (error) {
-      // MongoDB not available, check in-memory
-      user = inMemoryUsers.find(u => u.email === email);
+      // If database is not available, check in-memory storage
+      user = inMemoryUsers.find(u => u.email === email && u.role === role);
     }
 
     if (!user) {
@@ -155,16 +142,8 @@ router.post('/login', authRateLimit, async (req, res) => {
       });
     }
 
-    // Check if user is active
-    if (!user.isActive) {
-      return res.status(401).json({
-        error: 'Account deactivated',
-        message: 'Your account has been deactivated. Please contact support.'
-      });
-    }
-
     // Verify password
-    const isValidPassword = await user.comparePassword(password);
+    const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       return res.status(401).json({
         error: 'Invalid credentials',
@@ -172,37 +151,19 @@ router.post('/login', authRateLimit, async (req, res) => {
       });
     }
 
-    // Update last login
-    user.lastLogin = new Date();
-    try {
-      await user.save();
-    } catch (error) {
-      // MongoDB failed, update in-memory
-      const index = inMemoryUsers.findIndex(u => u._id === user._id);
-      if (index !== -1) {
-        inMemoryUsers[index].lastLogin = user.lastLogin;
-      }
-    }
-
     // Generate token
     const token = generateToken(user);
 
-    // Return user data and token
-    const userResponse = {
-      _id: user._id,
-      email: user.email,
-      name: user.name,
-      phone: user.phone,
-      role: user.role,
-      department: user.department,
-      isActive: user.isActive,
-      lastLogin: user.lastLogin,
-      createdAt: user.createdAt
-    };
-
     res.json({
       message: 'Login successful',
-      user: userResponse,
+      user: {
+        id: user._id || user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        isActive: user.isActive
+      },
       token
     });
 
@@ -210,15 +171,28 @@ router.post('/login', authRateLimit, async (req, res) => {
     console.error('Login error:', error);
     res.status(500).json({
       error: 'Login failed',
-      message: 'Unable to log in. Please try again.'
+      message: 'Internal server error'
     });
   }
 });
 
-// Get current user profile
-router.get('/profile', authenticateToken, async (req, res) => {
-  try {
-    const user = await User.findById(req.user!._id).select('-password');
+  // Get current user profile
+  router.get('/profile', authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user?._id;
+    
+    let user;
+    try {
+      user = await User.findById(userId).select('-password');
+    } catch (error) {
+      // If database is not available, check in-memory storage
+      user = inMemoryUsers.find(u => (u._id || u.id) === userId);
+      if (user) {
+        const { password, ...userWithoutPassword } = user;
+        user = userWithoutPassword;
+      }
+    }
+
     if (!user) {
       return res.status(404).json({
         error: 'User not found',
@@ -227,33 +201,48 @@ router.get('/profile', authenticateToken, async (req, res) => {
     }
 
     res.json({
-      user
+      user: {
+        id: user._id || user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        isActive: user.isActive
+      }
     });
 
   } catch (error) {
-    console.error('Profile fetch error:', error);
+    console.error('Profile error:', error);
     res.status(500).json({
-      error: 'Profile fetch failed',
-      message: 'Unable to fetch profile. Please try again.'
+      error: 'Failed to get profile',
+      message: 'Internal server error'
     });
   }
 });
 
-// Update user profile
-router.put('/profile', authenticateToken, async (req, res) => {
-  try {
-    const { name, phone, department } = req.body;
-    const updates: any = {};
+  // Update user profile
+  router.put('/profile', authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user?._id;
+    const updates = req.body;
 
-    if (name) updates.name = name;
-    if (phone !== undefined) updates.phone = phone;
-    if (department !== undefined) updates.department = department;
+    // Remove sensitive fields from updates
+    delete updates.password;
+    delete updates.email;
+    delete updates.role;
 
-    const user = await User.findByIdAndUpdate(
-      req.user!._id,
-      { $set: updates },
-      { new: true, runValidators: true }
-    ).select('-password');
+    let user;
+    try {
+      user = await User.findByIdAndUpdate(userId, updates, { new: true }).select('-password');
+    } catch (error) {
+      // If database is not available, update in-memory storage
+      const userIndex = inMemoryUsers.findIndex(u => (u._id || u.id) === userId);
+      if (userIndex !== -1) {
+        inMemoryUsers[userIndex] = { ...inMemoryUsers[userIndex], ...updates };
+        const { password, ...userWithoutPassword } = inMemoryUsers[userIndex];
+        user = userWithoutPassword;
+      }
+    }
 
     if (!user) {
       return res.status(404).json({
@@ -264,125 +253,21 @@ router.put('/profile', authenticateToken, async (req, res) => {
 
     res.json({
       message: 'Profile updated successfully',
-      user
+      user: {
+        id: user._id || user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        isActive: user.isActive
+      }
     });
 
   } catch (error) {
     console.error('Profile update error:', error);
     res.status(500).json({
-      error: 'Profile update failed',
-      message: 'Unable to update profile. Please try again.'
-    });
-  }
-});
-
-// Change password
-router.put('/change-password', authenticateToken, async (req, res) => {
-  try {
-    const { currentPassword, newPassword } = req.body;
-
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({
-        error: 'Missing passwords',
-        message: 'Current password and new password are required'
-      });
-    }
-
-    if (newPassword.length < 6) {
-      return res.status(400).json({
-        error: 'Invalid password',
-        message: 'New password must be at least 6 characters long'
-      });
-    }
-
-    const user = await User.findById(req.user!._id);
-    if (!user) {
-      return res.status(404).json({
-        error: 'User not found',
-        message: 'User not found'
-      });
-    }
-
-    // Verify current password
-    const isValidPassword = await user.comparePassword(currentPassword);
-    if (!isValidPassword) {
-      return res.status(401).json({
-        error: 'Invalid password',
-        message: 'Current password is incorrect'
-      });
-    }
-
-    // Update password
-    user.password = newPassword;
-    await user.save();
-
-    res.json({
-      message: 'Password changed successfully'
-    });
-
-  } catch (error) {
-    console.error('Password change error:', error);
-    res.status(500).json({
-      error: 'Password change failed',
-      message: 'Unable to change password. Please try again.'
-    });
-  }
-});
-
-// Admin: Get all users (admin only)
-router.get('/users', authenticateToken, requireRole(['admin']), async (req, res) => {
-  try {
-    const users = await User.find({}).select('-password').sort({ createdAt: -1 });
-    
-    res.json({
-      users
-    });
-
-  } catch (error) {
-    console.error('Users fetch error:', error);
-    res.status(500).json({
-      error: 'Users fetch failed',
-      message: 'Unable to fetch users. Please try again.'
-    });
-  }
-});
-
-// Admin: Update user status (admin only)
-router.patch('/users/:userId/status', authenticateToken, requireRole(['admin']), async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const { isActive } = req.body;
-
-    if (typeof isActive !== 'boolean') {
-      return res.status(400).json({
-        error: 'Invalid status',
-        message: 'isActive must be a boolean value'
-      });
-    }
-
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { isActive },
-      { new: true, runValidators: true }
-    ).select('-password');
-
-    if (!user) {
-      return res.status(404).json({
-        error: 'User not found',
-        message: 'User not found'
-      });
-    }
-
-    res.json({
-      message: `User ${isActive ? 'activated' : 'deactivated'} successfully`,
-      user
-    });
-
-  } catch (error) {
-    console.error('User status update error:', error);
-    res.status(500).json({
-      error: 'User status update failed',
-      message: 'Unable to update user status. Please try again.'
+      error: 'Failed to update profile',
+      message: 'Internal server error'
     });
   }
 });

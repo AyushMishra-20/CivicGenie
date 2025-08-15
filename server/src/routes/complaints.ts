@@ -103,6 +103,54 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
+// Simple POST route for testing without authentication
+router.post('/simple', async (req, res) => {
+  try {
+    const { text } = req.body;
+    
+    if (!text) {
+      return res.status(400).json({ error: 'Text is required' });
+    }
+    
+    // Create simple complaint data
+    const complaintData = {
+      user: 'Anonymous',
+      description: text,
+      language: 'en' as const,
+      category: 'other' as const,
+      status: 'open' as const,
+      priority: 'medium' as const,
+      department: 'general',
+      estimatedResolutionTime: '3-5 days',
+      keywords: [],
+      confidence: 0.8,
+      suggestions: [],
+      photos: [],
+      location: {
+        latitude: 0,
+        longitude: 0,
+        address: 'Unknown location',
+        city: 'Unknown',
+        state: 'Unknown',
+        pincode: '000000'
+      },
+      notificationPreferences: {
+        enabled: false,
+        browserNotifications: false,
+        statusUpdates: true,
+        resolutionUpdates: true
+      }
+    };
+    
+    // Save to database
+    const complaint = await ComplaintService.createComplaint(complaintData);
+    res.status(201).json(complaint);
+  } catch (error) {
+    console.error('Error creating simple complaint:', error);
+    res.status(500).json({ error: 'Failed to create complaint' });
+  }
+});
+
 // POST photo analysis endpoint
 router.post('/:id/analyze-photo', async (req, res) => {
   try {
