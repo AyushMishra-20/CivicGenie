@@ -1,16 +1,10 @@
 [build]
   base = "client"
-  command = "npm run build"
-  publish = "dist"
-  functions = "../netlify/functions"
+  command = "echo 'Using static HTML file'"
+  publish = "public"
 
 [build.environment]
   NODE_VERSION = "18"
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
 
 [[redirects]]
   from = "/*"
