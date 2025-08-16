@@ -31,7 +31,7 @@ interface User {
 }
 
 // The base URL for your backend API.
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/complaints';
+const API_URL = import.meta.env.VITE_API_URL || '/api/complaints';
 
 // PWA: Service Worker Registration
 if ('serviceWorker' in navigator) {
@@ -466,7 +466,7 @@ const App = () => {
   const handleSignup = async (userData: any) => {
     setAuthLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -518,7 +518,7 @@ const App = () => {
   const handleLogin = async (credentials: any) => {
     setAuthLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
