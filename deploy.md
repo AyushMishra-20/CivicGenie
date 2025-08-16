@@ -1,107 +1,91 @@
-# 🚀 CiviGenie Deployment Guide
+# CiviGenie Deployment Guide
 
-## Quick Deployment to Vercel + Railway
+## Frontend Deployment (Netlify)
 
-### Step 1: Deploy Backend to Railway
-
-1. **Go to [Railway.app](https://railway.app)**
-2. **Sign up/Login with GitHub**
-3. **Click "New Project" → "Deploy from GitHub repo"**
-4. **Select your CiviGenie repository**
-5. **Set Environment Variables:**
-   ```
-   NODE_ENV=production
-   PORT=5000
-   JWT_SECRET=your-super-secret-jwt-key-here
-   MONGODB_URI=your-mongodb-atlas-uri
-   ```
-6. **Deploy!** Railway will automatically detect it's a Node.js app
-
-### Step 2: Deploy Frontend to Vercel
-
-1. **Go to [Vercel.com](https://vercel.com)**
-2. **Sign up/Login with GitHub**
-3. **Click "New Project" → "Import Git Repository"**
-4. **Select your CiviGenie repository**
-5. **Configure:**
-   - **Framework Preset**: Vite
-   - **Root Directory**: `client`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
-6. **Add Environment Variable:**
-   ```
-   VITE_API_URL=https://your-railway-app-url.railway.app/api/complaints
-   ```
-7. **Deploy!**
-
-### Step 3: Update API URLs
-
-After deployment, update these files:
-
-1. **In `client/src/App.tsx`:**
-   ```typescript
-   const API_URL = import.meta.env.VITE_API_URL || 'https://your-railway-url.railway.app/api/complaints';
+1. **Push to GitHub** (if not already done):
+   ```bash
+   git add .
+   git commit -m "Ready for deployment"
+   git push origin main
    ```
 
-2. **In `client/src/App.tsx` (auth functions):**
-   ```typescript
-   const response = await fetch('https://your-railway-url.railway.app/api/auth/login', {
-   ```
+2. **Deploy to Netlify**:
+   - Go to [netlify.com](https://netlify.com) and sign up/login
+   - Click "New site from Git"
+   - Connect your GitHub account
+   - Select your `CivicGenie` repository
+   - Set build settings:
+     - **Base directory**: `client`
+     - **Build command**: `npm run build`
+     - **Publish directory**: `dist`
+   - Click "Deploy site"
 
-### Step 4: Test Your Deployment
+## Backend Deployment (Cyclic.sh) - FREE, NO CREDIT CARD REQUIRED
 
-1. **Frontend**: `https://your-app.vercel.app`
-2. **Backend**: `https://your-app.railway.app/api/health`
+1. **Deploy to Cyclic**:
+   - Go to [cyclic.sh](https://cyclic.sh) and sign up/login with GitHub
+   - Click "Link Your Own" → "Connect GitHub"
+   - Select your `CivicGenie` repository
+   - Configure the app:
+     - **Root Directory**: `server`
+     - **Branch**: `main`
+   - Add environment variables:
+     - `MONGODB_URI`: Your MongoDB connection string
+     - `JWT_SECRET`: A random secret string (e.g., `your-super-secret-jwt-key-here`)
+     - `NODE_ENV`: `production`
+   - Click "Deploy"
 
-## Alternative: All-in-One Deployment
+2. **Get your backend URL**:
+   - Once deployed, Cyclic will give you a URL like: `https://civigenie-backend.cyclic.app`
+   - Copy this URL
 
-### Option A: Vercel (Frontend + Backend)
+3. **Update frontend API URL**:
+   - In your Netlify deployment, go to Site settings → Environment variables
+   - Add: `VITE_API_URL` = `https://civigenie-backend.cyclic.app`
+   - Redeploy the site
 
-1. **Deploy to Vercel** (handles both frontend and backend)
-2. **Set environment variables in Vercel dashboard**
-3. **Done!**
+## Alternative Backend Platforms (All Free)
 
-### Option B: Netlify + Render
+### Option 1: Glitch.com (No Credit Card Required)
+- Go to [glitch.com](https://glitch.com)
+- Create new project → Import from GitHub
+- Select your repository
+- Set environment variables in `.env` file
+- Get your app URL and update frontend
 
-1. **Frontend**: Deploy to Netlify
-2. **Backend**: Deploy to Render
-3. **Update API URLs accordingly**
+### Option 2: Replit.com (No Credit Card Required)
+- Go to [replit.com](https://replit.com)
+- Create new Node.js repl
+- Import from GitHub
+- Set environment variables
+- Deploy and get URL
 
-## Environment Variables Needed
-
-### Backend (.env)
-```
-NODE_ENV=production
-PORT=5000
-JWT_SECRET=your-super-secret-jwt-key-here
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/civigenie
-```
-
-### Frontend (.env)
-```
-VITE_API_URL=https://your-backend-url.com/api/complaints
-```
-
-## Post-Deployment Checklist
-
-- [ ] Test user registration
-- [ ] Test user login
-- [ ] Test complaint submission
-- [ ] Test admin panel
-- [ ] Test staff panel
-- [ ] Verify notifications work
-- [ ] Check mobile responsiveness
-- [ ] Test image upload
-- [ ] Test location sharing
+### Option 3: Heroku (Free Tier - No Credit Card for Basic)
+- Go to [heroku.com](https://heroku.com)
+- Create new app
+- Connect GitHub repository
+- Set environment variables
+- Deploy
 
 ## Troubleshooting
 
 ### Common Issues:
-1. **CORS errors**: Add your frontend URL to backend CORS settings
-2. **API 404**: Check if API routes are properly configured
-3. **Build failures**: Check Node.js version compatibility
-4. **Environment variables**: Ensure all required vars are set
+1. **Build fails**: Check if all dependencies are in `package.json`
+2. **Port issues**: Make sure backend uses `process.env.PORT`
+3. **CORS errors**: Backend should allow frontend domain
+4. **Database connection**: Ensure MongoDB Atlas IP whitelist includes `0.0.0.0/0`
 
-### Support:
-- Railway: [docs.railway.app](https://docs.railway.app)
-- Vercel: [vercel.com/docs](https://vercel.com/docs)
+### Environment Variables Checklist:
+- [ ] `MONGODB_URI` (MongoDB connection string)
+- [ ] `JWT_SECRET` (random secret string)
+- [ ] `NODE_ENV` (production)
+- [ ] `PORT` (platform default)
+- [ ] `VITE_API_URL` (frontend only - backend URL)
+
+## Quick Test
+After deployment:
+1. Frontend should load at your Netlify URL
+2. Try creating an account
+3. Try logging in
+4. Check browser console for any errors
+5. Check backend logs for any issues
